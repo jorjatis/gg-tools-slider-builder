@@ -1,4 +1,5 @@
 # Slider Builder
+n**Pruébalo:** https://ggtools-sliderbuilder.netlify.app
 
 Constructor visual de sliders. Configuras el slider en el panel, lo ves en una vista previa con anchos de pantalla reales y exportas **HTML + CSS + JS declarativo** (sin imports ni exports).
 
