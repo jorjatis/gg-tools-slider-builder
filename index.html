@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slider Builder</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="src/builder/builder.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand__mark" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="brand__name">Slider Builder</span>
+    </div>
+    <div class="topbar__actions">
+      <button type="button" class="btn btn--ghost btn--help" id="btn-help" aria-label="Ayuda: qué hace cada opción" title="Ayuda">?</button>
+      <button type="button" class="btn btn--ghost" id="btn-reset">Restablecer</button>
+      <button type="button" class="btn btn--primary" id="btn-export">Exportar código</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="panel" aria-label="Opciones del slider">
+      <section class="block block--sliders">
+        <h2 class="block__title">Sliders en la página</h2>
+        <div class="slider-tabs" id="sliders" role="group" aria-label="Slider que estás editando"></div>
+        <p class="field__hint">Cada slider tiene sus propias opciones e items. Elige cuál editar o arrástralos para ordenarlos.</p>
+      </section>
+      <details class="block" id="presets-block">
+        <summary><h2 class="block__title">Configuraciones por defecto</h2></summary>
+        <div class="presets" id="presets"></div>
+      </details>
+      <div id="controls"></div>
+      <section class="block" id="items-block">
+        <div class="block__head">
+          <h2 class="block__title">Items <span class="count" id="items-count"></span></h2>
+          <div class="stepper">
+            <button type="button" class="icon-btn" id="item-remove" aria-label="Quitar último item">−</button>
+            <button type="button" class="icon-btn" id="item-add" aria-label="Añadir item">+</button>
+          </div>
+        </div>
+        <ol class="items" id="items"></ol>
+      </section>
+    </aside>
+
+    <main class="stage">
+      <div class="stage__bar">
+        <div class="seg seg--sm" id="devices" role="group" aria-label="Tamaño de pantalla"></div>
+        <label class="width">
+          <span class="sr-only">Ancho de la vista previa</span>
+          <input type="range" id="width" min="320" max="1600" step="10">
+          <output id="width-out"></output>
+        </label>
+        <span class="status" id="status" aria-live="polite"></span>
+      </div>
+      <div class="stage__canvas" id="canvas">
+        <div class="frame" id="frame">
+          <iframe id="preview" title="Vista previa del slider"></iframe>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <dialog class="dialog" id="export-dialog" aria-labelledby="export-title">
+    <div class="dialog__head">
+      <h2 id="export-title">Exportar</h2>
+      <button type="button" class="icon-btn" data-close aria-label="Cerrar">✕</button>
+    </div>
+    <p class="dialog__note">El HTML solo lleva el slider y un <code>&lt;script&gt;</code> con sus opciones (<code>SliderBuilder.init('#id', { … })</code>, solo las que cambian respecto a las de por defecto). CSS y JS van sin comentarios y solo con lo que usa tu configuración. El JS va en IIFEs: puedes poner más código antes o después. «Descargar .zip» trae index.html, sliderBuilder.css y los .js.</p>
+    <div class="tabs" role="tablist" id="export-tabs">
+      <button role="tab" class="tab" data-tab="html" aria-selected="true">HTML</button>
+      <button role="tab" class="tab" data-tab="css" aria-selected="false">CSS</button>
+      <button role="tab" class="tab" data-tab="js" aria-selected="false">JS</button>
+      <button role="tab" class="tab" data-tab="single" aria-selected="false">Todo en uno</button>
+      <label class="tab-option" id="inline-js-wrap" hidden><input type="checkbox" id="inline-js"> Incluir todo el JS</label>
+    </div>
+    <pre class="code" id="export-code" tabindex="0"></pre>
+    <div class="dialog__foot">
+      <span class="dialog__meta" id="export-meta"></span>
+      <button type="button" class="btn btn--ghost" id="btn-copy">Copiar</button>
+      <button type="button" class="btn btn--primary" id="btn-download" title="index.html + sliderBuilder.css + los .js necesarios">Descargar .zip</button>
+    </div>
+  </dialog>
+
+  <dialog class="dialog dialog--wiki" id="wiki-dialog" aria-labelledby="wiki-title">
+    <div class="dialog__head wiki__head">
+      <h2 id="wiki-title">Ayuda</h2>
+      <input type="text" id="wiki-search" placeholder="Buscar una opción…" aria-label="Buscar en la ayuda" autocomplete="off">
+      <button type="button" class="icon-btn" data-close-wiki aria-label="Cerrar">✕</button>
+    </div>
+    <div class="wiki">
+      <nav class="wiki__nav" id="wiki-nav" aria-label="Apartados de la ayuda"></nav>
+      <div class="wiki__body" id="wiki-body" tabindex="0">
+        <p class="wiki__empty" id="wiki-empty" hidden>No hay nada con esas palabras.</p>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="dialog dialog--confirm" id="confirm-dialog" aria-labelledby="confirm-title">
+    <form method="dialog">
+      <h2 id="confirm-title"></h2>
+      <p id="confirm-text"></p>
+      <div class="dialog__actions">
+        <button class="btn btn--ghost" value="cancel" id="confirm-cancel">Cancelar</button>
+        <button class="btn btn--danger" value="ok" id="confirm-ok">Eliminar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="src/runtime/assets.js"></script>
+  <script src="src/runtime/sliderBuilder-core.js"></script>
+  <script src="src/builder/presets.js"></script>
+  <script src="src/builder/generator.js"></script>
+  <script src="src/builder/zip.js"></script>
+  <script src="src/builder/app.js"></script>
+  <script src="src/builder/wiki.js"></script>
+</body>
+</html>

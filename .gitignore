@@ -1,0 +1,12 @@
+# Dependencias y resultados
+node_modules/
+test-results/
+playwright-report/
+
+# Solo en local
+tests/
+.claude/
+.env*
+*.log
+.DS_Store
+Thumbs.db

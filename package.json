@@ -1,0 +1,11 @@
+{
+  "name": "slider-builder",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Constructor visual de sliders con exportación HTML/CSS/JS modular",
+  "scripts": {
+    "start": "node scripts/serve.js",
+    "build": "node scripts/build-assets.js"
+  },
+  "engines": { "node": ">=18" }
+}

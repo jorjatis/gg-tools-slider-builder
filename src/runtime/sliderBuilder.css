@@ -1,0 +1,328 @@
+/*
+ * v-sb — estilos por bloques. Cada marca "if" dice qué hace falta para exportar lo que sigue,
+ * hasta la próxima marca: & = y, | = o. Los nombres salen de features() en generator.js.
+ */
+/* @if base */
+.v-sb {
+  --v-sb-gap: 16px;
+  --v-sb-accent: #4f46e5;
+  position: relative;
+  box-sizing: border-box;
+}
+.v-sb:focus { outline: none; }
+.v-sb *, .v-sb *::before, .v-sb *::after { box-sizing: border-box; }
+
+.v-sb-stage { position: relative; }
+.v-sb-viewport { overflow: hidden; }
+.v-sb-track {
+  display: flex;
+  gap: var(--v-sb-gap);
+  will-change: transform;
+}
+.v-sb-item {
+  flex: 0 0 auto;
+  min-width: 0;
+  transition: opacity .35s ease, transform .35s ease, filter .35s ease;
+}
+
+/* Slider activo */
+/* @if drag */
+.v-sb--slider .v-sb-viewport { touch-action: pan-y; }
+.v-sb--slider.v-sb--draggable .v-sb-viewport { cursor: grab; }
+.v-sb--dragging .v-sb-viewport { cursor: grabbing; }
+.v-sb--dragging .v-sb-track { user-select: none; -webkit-user-select: none; }
+.v-sb--dragging .v-sb-item { transition: none; }
+
+/* @if static */
+/* Estático: no hace falta slider (cabe o está por encima del breakpoint) */
+.v-sb--static .v-sb-track {
+  flex-wrap: wrap;
+  justify-content: var(--v-sb-static-justify, flex-start);
+  transform: none !important;
+}
+.v-sb--static .v-sb-shadow,
+.v-sb--static .v-sb-arrow,
+.v-sb--static .v-sb-controls,
+.v-sb--static .v-sb-menu { display: none !important; }
+
+/* @if shadows */
+/* Sombras de borde: indican que hay más contenido */
+.v-sb { --v-sb-shadow-color: #ffffff; --v-sb-shadow-size: 64px; }
+.v-sb-shadow {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--v-sb-shadow-size);
+  pointer-events: none;
+  z-index: 2;
+  transition: opacity .25s ease;
+}
+.v-sb-shadow--start { left: 0; background: linear-gradient(to right, var(--v-sb-shadow-color), transparent); }
+.v-sb-shadow--end { right: 0; background: linear-gradient(to left, var(--v-sb-shadow-color), transparent); }
+.v-sb--at-start .v-sb-shadow--start,
+.v-sb--at-end .v-sb-shadow--end { opacity: 0; }
+
+/* @if arrows */
+/* Flechas */
+.v-sb { --v-sb-arrow-size: 44px; }
+.v-sb-arrow {
+  width: var(--v-sb-arrow-size);
+  height: var(--v-sb-arrow-size);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(15, 15, 20, .08);
+  border-radius: 999px;
+  background: #fff;
+  color: #18181b;
+  box-shadow: 0 2px 10px rgba(15, 15, 20, .12);
+  cursor: pointer;
+  z-index: 3;
+  transition: opacity .2s ease, transform .2s ease, background .2s ease;
+}
+.v-sb-arrow:hover:not(:disabled) { background: var(--v-sb-accent); color: #fff; }
+.v-sb-arrow:focus-visible { outline: 2px solid var(--v-sb-accent); outline-offset: 2px; }
+.v-sb-arrow:disabled { opacity: .35; cursor: default; }
+/* @if arrows&square */
+.v-sb[data-sb-arrow-style="square"] .v-sb-arrow { border-radius: 10px; }
+/* @if arrows&minimal */
+.v-sb[data-sb-arrow-style="minimal"] .v-sb-arrow { background: transparent; border-color: transparent; box-shadow: none; }
+.v-sb[data-sb-arrow-style="minimal"] .v-sb-arrow:hover:not(:disabled) { background: rgba(15, 15, 20, .06); color: inherit; }
+
+/* @if arrows&side */
+.v-sb-stage > .v-sb-arrow { position: absolute; top: 50%; transform: translateY(-50%); }
+.v-sb-stage > .v-sb-arrow--prev { left: 12px; }
+.v-sb-stage > .v-sb-arrow--next { right: 12px; }
+/* @if arrows&outside */
+.v-sb[data-sb-arrows-pos="outside"].v-sb--slider { padding-inline: calc(var(--v-sb-arrow-size) + 12px); }
+.v-sb[data-sb-arrows-pos="outside"] .v-sb-stage > .v-sb-arrow--prev { left: calc(-1 * var(--v-sb-arrow-size) - 8px); }
+.v-sb[data-sb-arrows-pos="outside"] .v-sb-stage > .v-sb-arrow--next { right: calc(-1 * var(--v-sb-arrow-size) - 8px); }
+
+/* @if base */
+/* Controles inferiores: puntos / fracción / flechas abajo */
+.v-sb-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 18px;
+}
+.v-sb-controls:empty { display: none; }
+/* @if arrows&bottom */
+.v-sb[data-sb-arrows-pos="bottom"] .v-sb-controls { justify-content: space-between; }
+.v-sb-arrows { display: flex; gap: 8px; margin-left: auto; }
+/* @if dots|lines|fraction */
+.v-sb-dots { display: flex; align-items: center; flex-wrap: wrap; gap: 2px; }
+/* @if dots|lines */
+.v-sb-dot {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.v-sb-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 99px;
+  background: rgba(15, 15, 20, .22);
+  transition: width .3s ease, background .3s ease;
+}
+.v-sb-dot.is-active::after { width: 22px; background: var(--v-sb-accent); }
+/* @if lines */
+.v-sb-dots--lines .v-sb-dot { width: 30px; }
+.v-sb-dots--lines .v-sb-dot::after { width: 26px; height: 3px; }
+.v-sb-dots--lines .v-sb-dot.is-active::after { width: 26px; }
+/* @if dots|lines */
+.v-sb-dot:focus-visible { outline: 2px solid var(--v-sb-accent); outline-offset: 1px; border-radius: 6px; }
+/* @if fraction */
+.v-sb-fraction { font-variant-numeric: tabular-nums; font-size: 14px; font-weight: 600; letter-spacing: .02em; }
+
+/* @if menu */
+/* Menú superior: pista con scroll horizontal y flechas si no caben */
+.v-sb-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  margin-bottom: 16px;
+}
+.v-sb-menu__track {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  gap: 6px;
+  padding: 2px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.v-sb-menu__track::-webkit-scrollbar { display: none; }
+.v-sb-menu.has-overflow .v-sb-menu__track { cursor: grab; touch-action: pan-x pan-y; }
+.v-sb-menu.is-dragging .v-sb-menu__track { cursor: grabbing; user-select: none; -webkit-user-select: none; }
+.v-sb-menu.is-dragging .v-sb-menu__btn { pointer-events: none; }
+.v-sb-menu.has-overflow .v-sb-menu__track {
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
+}
+.v-sb-menu.has-overflow.at-start .v-sb-menu__track {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent 100%);
+  mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent 100%);
+}
+.v-sb-menu.has-overflow.at-end .v-sb-menu__track {
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 40px);
+  mask-image: linear-gradient(to right, transparent 0, #000 40px);
+}
+.v-sb-menu.has-overflow.at-start.at-end .v-sb-menu__track { -webkit-mask-image: none; mask-image: none; }
+.v-sb-menu__arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  width: 28px;
+  height: 28px;
+  display: none;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(15, 15, 20, .1);
+  border-radius: 50%;
+  background: #fff;
+  color: #18181b;
+  box-shadow: 0 2px 8px rgba(15, 15, 20, .15);
+  transform: translateY(-50%);
+  cursor: pointer;
+  transition: opacity .2s ease;
+}
+.v-sb-menu__arrow svg { width: 16px; height: 16px; }
+.v-sb-menu__arrow--prev { left: 0; }
+.v-sb-menu__arrow--next { right: 0; }
+.v-sb-menu.has-overflow .v-sb-menu__arrow { display: grid; }
+.v-sb-menu.at-start .v-sb-menu__arrow--prev,
+.v-sb-menu.at-end .v-sb-menu__arrow--next { opacity: 0; pointer-events: none; }
+.v-sb-menu__btn {
+  flex: none;
+  padding: 7px 14px;
+  border: 1px solid rgba(15, 15, 20, .14);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+.v-sb-menu__btn:hover { border-color: var(--v-sb-accent); }
+.v-sb-menu__btn.is-active { background: var(--v-sb-accent); border-color: var(--v-sb-accent); color: #fff; }
+/* @if menu-inside */
+/* Pantalla completa: menú arriba a la derecha, dentro de la sección */
+.v-sb--fs .v-sb-pin > .v-sb-menu {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 4;
+  max-width: calc(100% - 32px);
+  margin: 0;
+}
+.v-sb--fs .v-sb-pin > .v-sb-menu .v-sb-menu__btn:not(.is-active) {
+  background: rgba(255, 255, 255, .92);
+  border-color: transparent;
+  color: #18181b;
+}
+
+/* Efectos */
+/* @if dim */
+.v-sb { --v-sb-dim: 0.4; }
+/* @if dim&hover */
+@media (hover: hover) {
+  .v-sb[data-sb-effect-on="hover"][data-sb-effect~="dim"] .v-sb-track:hover .v-sb-item:not(:hover) { opacity: var(--v-sb-dim); }
+}
+/* @if dim&active */
+.v-sb--slider[data-sb-effect-on="active"][data-sb-effect~="dim"] .v-sb-item:not(.is-active) { opacity: var(--v-sb-dim); }
+/* @if gray&hover */
+@media (hover: hover) {
+  .v-sb[data-sb-effect-on="hover"][data-sb-effect~="gray"] .v-sb-track:hover .v-sb-item:not(:hover) { filter: grayscale(1); }
+}
+/* @if gray&active */
+.v-sb--slider[data-sb-effect-on="active"][data-sb-effect~="gray"] .v-sb-item:not(.is-active) { filter: grayscale(1); }
+/* @if scale */
+.v-sb { --v-sb-scale: 1.05; }
+.v-sb[data-sb-effect~="scale"] .v-sb-viewport { padding-block: 14px; margin-block: -14px; }
+/* @if scale&hover */
+@media (hover: hover) {
+  .v-sb[data-sb-effect-on="hover"][data-sb-effect~="scale"] .v-sb-item:hover { transform: scale(var(--v-sb-scale)); position: relative; z-index: 1; }
+}
+/* @if scale&active */
+.v-sb--slider[data-sb-effect-on="active"][data-sb-effect~="scale"] .v-sb-item:not(.is-active) { transform: scale(calc(2 - var(--v-sb-scale))); }
+
+/* @if fs */
+/* Pantalla completa: sección pinneada al 100dvh */
+/* El recorrido de scroll usa svh (estable): la barra de URL del móvil no lo altera. */
+.v-sb--fs { height: calc(100dvh - var(--v-sb-pin-top, 0px) + var(--v-sb-fs-steps, 0) * var(--v-sb-fs-length, 100) * 1svh); }
+.v-sb--fs .v-sb-pin {
+  position: sticky;
+  top: var(--v-sb-pin-top, 0px);
+  height: calc(100dvh - var(--v-sb-pin-top, 0px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+/* @if menu-top */
+/* Menú anexo (opción top): fijo, fijo y transparente encima de los slides, o anclas sin fijar */
+.v-sb-top { --v-sb-accent: #4f46e5; }
+/* @if menu-sticky|menu-overlay */
+.v-sb-top--sticky,
+.v-sb-top--overlay { position: sticky; top: 0; z-index: 20; will-change: transform; }
+/* @if menu-overlay */
+.v-sb-top--overlay {
+  background: rgba(255, 255, 255, .55) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  backdrop-filter: blur(12px) saturate(1.4);
+  border-bottom-color: rgba(255, 255, 255, .35) !important;
+}
+/* @if menu-anchor */
+.v-sb-top--anchor { position: relative; }
+/* @if fs&arrows&outside */
+/* Flechas fuera en pantalla completa: hueco lateral dentro de la sección */
+.v-sb--fs[data-sb-arrows-pos="outside"].v-sb--slider { padding-inline: 0; }
+.v-sb--fs[data-sb-arrows-pos="outside"].v-sb--slider .v-sb-stage { margin-inline: calc(var(--v-sb-arrow-size) + 16px); }
+/* @if fs */
+.v-sb--fs .v-sb-menu { margin-bottom: 0; }
+.v-sb--fs .v-sb-stage { flex: 1; min-height: 0; }
+.v-sb--fs .v-sb-viewport,
+.v-sb--fs .v-sb-track,
+.v-sb--fs .v-sb-item { height: 100%; }
+.v-sb--fs .v-sb-controls { position: absolute; left: 0; right: 0; bottom: 18px; margin: 0; z-index: 3; pointer-events: none; }
+.v-sb--fs .v-sb-controls > * { pointer-events: auto; }
+/* @if fs&arrows&bottom */
+.v-sb--fs[data-sb-arrows-pos="bottom"] .v-sb-controls { padding-inline: 24px; }
+/* @if fs&static */
+.v-sb--fs.v-sb--static { height: auto; }
+.v-sb--fs.v-sb--static .v-sb-pin { position: static; height: auto; }
+.v-sb--fs.v-sb--static .v-sb-item { height: auto; min-height: 60vh; }
+
+/* @if base */
+.v-sb-sr {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v-sb-item { transition: none; }
+}
+/* @if dots|lines */
+@media (prefers-reduced-motion: reduce) { .v-sb-dot::after { transition: none; } }
+/* @if shadows */
+@media (prefers-reduced-motion: reduce) { .v-sb-shadow { transition: none; } }
+/* @if fs&scale */
+.v-sb--fs[data-sb-effect~="scale"] .v-sb-viewport { padding-block: 0; margin-block: 0; }
